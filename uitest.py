@@ -1,15 +1,22 @@
+import os
+import time
 import signal
 from blessed import Terminal
-import time
-import os
+
+# Need hook to pb listener subproc
+#   saves messages to queue check queue on 
+#   keypress and timeout
+# hook to pb client handle to send pushes
 
 term = Terminal()
 
+## util functions
 def _clear():
     if os.name == 'nt':
         os.system('cls')
     else:
         os.system('clear')
+
 
 def clear_line(section=None, length=None, location=None):
     if section == None:
@@ -54,12 +61,17 @@ def write_line(section=None, words=None, location=None):
     print('{}{}'.format(term.move_y(section),
                         words))
 
+
 def input_section():
     return 0
 
-def sent_section():
-    return term.height//3
 
+def sent_section():
+    return term.height//4
+
+
+def push_section():
+    return term.height//2
 
 def main():
     val = ''
@@ -68,21 +80,39 @@ def main():
     longest_word = []
        
     def write_headers(*args):
+        ''' helped function to clear screen and redraw 
+            section headers after a screen resize event'''
         _clear()
+
+        # title
         write_line(location=input_section() + 0,
                    words=term.center('Welcome to PLI!'))
-        write_line(location=input_section() + 2, 
+
+        # input section
+        write_line(location=input_section() + 2,
+                   words='_'*term.width)
+        write_line(location=input_section() + 3, 
                    words=term.bold_underline('<<< User Input >>>'))
         write_line(section='input', words=''.join(words))
 
-        write_line(location=sent_section() + 0, 
+        # last message section
+        write_line(location=sent_section() + 0,
+                   words='_'*term.width)
+        write_line(location=sent_section() + 1, 
                    words=term.bold_underline('<<< Last sent message >>>'))
         write_line(section='sent', words=''.join(last_sent))   
+
+        # pushes section
+        write_line(location=push_section() + 0,
+                   words='_'*term.width)
+        write_line(location=push_section() + 1,
+                   words=term.bold_underline('<<< Recent Pushes >>>'))
  
-    signal.signal(signal.SIGWINCH, write_headers)
+    #signal.signal(signal.SIGWINCH, write_headers)
     write_headers()
  
     while True:
+        signal.signal(signal.SIGWINCH, write_headers)
         val = term.inkey(timeout=10)
         if not val: # timeout
             pass
