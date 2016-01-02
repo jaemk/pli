@@ -1,0 +1,7 @@
+*old
+*env
+*__pycache__*
+*.swp
+*.swo
+*settings.py
+
