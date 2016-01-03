@@ -94,16 +94,14 @@ def _start_listener(target, arg):
                    name='Listener')
     proc.start()
     print('{} started'.format(proc.name))
-
+    time.sleep(1)
     return proc
 
 
 def _check_pushes(pushes):
     qval = _get(queue)
-    # update = False
     if qval != None:
         pushes.append(qval)
-        # update = True
         clear_line(section='pushes', length=len('\n'.join(pushes)))
         write_line(section='pushes', words='\n'.join(pushes))
         
