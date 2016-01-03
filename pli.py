@@ -8,15 +8,11 @@ from multiprocessing import Process, Queue
 import listener
 import pusher
 
-# Need hook to pb listener subproc
-#   saves messages to queue check queue on 
-#   keypress and timeout
-# hook to pb client handle to send pushes
 
 term = Terminal()
 queue = Queue()
 
-## util functions
+
 def _clear():
     if os.name == 'nt':
         os.system('cls')
