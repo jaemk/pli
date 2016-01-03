@@ -1,5 +1,6 @@
 # pli
-pushbullet cli
+## A Pushbullet CLI!
+
 
 
 * required packages: pushbullet.py, blessed -- see requirements.txt
