@@ -20,22 +20,14 @@ class PushHandler(object):
         self.last_push = time.time()
         self.users = users
         self.handle = handle
-        print(self.users, self.handle)
-    
-    def catch(self, event):
-        # print('received: {}'.format(event))
-        push = self.handle.get_pushes(self.last_push)[0]
-        self.last_push = time.time()
-        # print(push)
-        push_items = push.keys()
-        message_items = ['body', 'url', 'file_url']
-        
-        if push['dismissed'] == False:
-            for item in push_items:
-                if item in message_items:
-                    print('message {}: {}'.format(item, push[item]))
-        else:
-            print('type: {} - dismissed'.format(event['type']))
+        # print(self.users, self.handle)
+
+
+    def read_push(self):
+        while True:
+            val = input('to push >> ').strip().lower()
+            if val:
+                self.handle.push_note('', val)
 
 
 class Pushy(object):
@@ -44,29 +36,31 @@ class Pushy(object):
 
     key = settings.API_KEY
     users = settings.USERS
-    ear = None
 
     @classmethod
     def _connect(cls):
         if cls.key and cls.users:
             cls.pb = Pushbullet(cls.key)
             cls.handler = PushHandler(cls.users, cls.pb)
-            cls.ear = Listener(account=cls.pb,
-                               on_push=cls.handler.catch,
-                               http_proxy_host=cls.HPH,
-                               http_proxy_port=cls.HPP)
-
         else:
             raise SettingsError('Please check info in your settings.py file')
 
     @classmethod
     def _run(cls):
-        cls.ear.run_forever()
+        cls.handler.read_push()
 
     @classmethod
     def _stop(cls):
-        if cls.ear:
-            cls.ear.close()
+        return
+
+
+def get_handle():
+    try:
+        Pushy._connect()
+        return Pushy.handler.handle
+    except SettingsError as err:
+        print('Error: ', err)
+        
 
 
 def main():
