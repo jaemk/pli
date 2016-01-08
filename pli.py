@@ -121,7 +121,7 @@ def main():
 
         # title
         write_line(location=input_section() + 0,
-                   words=term.center('Welcome to PLI!'))
+                   words=term.center('Welcome to PLI! -- (\'Q\' to exit)'))
 
         # input section
         write_line(location=input_section() + 2,
