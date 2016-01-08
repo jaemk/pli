@@ -62,7 +62,6 @@ def get_handle():
         print('Error: ', err)
         
 
-
 def main():
     try:
         Pushy._connect()
