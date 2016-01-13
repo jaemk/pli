@@ -81,6 +81,7 @@ def push_section():
 
 
 def _get(q):
+    ''' pull latest push from proc queue '''
     if not q.empty():
         return q.get()
     return None
@@ -115,44 +116,44 @@ def main():
     pushes = []
        
     def write_headers(*args):
-        ''' helped function to clear screen and redraw 
-            section headers after a screen resize event'''
+        ''' helper to clear screen and redraw section 
+            headers after a screen resize event (SIGWINCH)'''
         _clear()
 
-        # title
+        # draw title
         write_line(location=input_section() + 0,
-                   words=term.center('Welcome to PLI! -- (\'Q\' to exit)'))
+                   words=term.center('Welcome to PLI! -- (input \'Q\' to exit)'))
 
-        # input section
+        # draw input section
         write_line(location=input_section() + 2,
                    words='_'*term.width)
         write_line(location=input_section() + 3, 
                    words=term.bold_underline('<<< User Input >>>'))
         write_line(section='input', words=''.join(words))
 
-        # last message section
+        # draw last message section
         write_line(location=sent_section() + 0,
                    words='_'*term.width)
         write_line(location=sent_section() + 1, 
                    words=term.bold_underline('<<< Last sent message >>>'))
         write_line(section='sent', words=''.join(last_sent))   
 
-        # pushes section
+        # draw pushes section
         write_line(location=push_section() + 0,
                    words='_'*term.width)
         write_line(location=push_section() + 1,
                    words=term.bold_underline('<<< Recent Pushes >>>'))
         write_line(section='pushes', words = '\n'.join(pushes))
  
-    #signal.signal(signal.SIGWINCH, write_headers)
     write_headers()
  
     while True:
         signal.signal(signal.SIGWINCH, write_headers)
+    
         _check_pushes(pushes)
         
         val = term.inkey(timeout=2)
-        if not val: # timeout
+        if not val: # input timeout
             pass    
         elif val.is_sequence:
             if val.name == 'KEY_ENTER':
