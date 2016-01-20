@@ -1,6 +1,5 @@
 #!/home/james/projects/pli/pbenv/bin/python
 
-
 from pushbullet import Listener
 from pushbullet import Pushbullet
 import settings
@@ -16,12 +15,27 @@ class SettingsError(Exception):
 
 
 class PushHandler(object):
-    def __init__(self, users, handle):
+    def __init__(self, users, handle, queue=None):
         self.last_push = time.time()
         self.users = users
         self.handle = handle
-        # print(self.users, self.handle)
+        self.queue = queue
 
+    def catch(self, event):
+        push_event = self.handle.get_pushes(self.last_push)
+        if not push_event:
+            return
+        push = push_event[0]
+        self.last_push = time.time()
+        push_items = push.keys()
+        message_items = ['body', 'url', 'file_url']
+        
+        if push['dismissed'] == False:
+            message = []
+            for item in push_items:
+                if item in message_items:
+                    message.append(push[item])
+            self.queue.put(', '.join(message))
 
     def read_push(self):
         while True:
@@ -31,9 +45,9 @@ class PushHandler(object):
 
 
 class Pushy(object):
+    ''' Create a pushbullet connection '''
     HPH = None
     HPP = None
-
     key = settings.API_KEY
     users = settings.USERS
 
@@ -55,6 +69,9 @@ class Pushy(object):
 
 
 def get_handle():
+    ''' Return handle that can push to devices
+        handle = get_handle()
+        handle.push_note('subject','your note') '''
     try:
         Pushy._connect()
         return Pushy.handler.handle
@@ -63,6 +80,8 @@ def get_handle():
         
 
 def main():
+    ''' Run outside of pli
+        Read user input and push to devices '''
     try:
         Pushy._connect()
         Pushy._run()
